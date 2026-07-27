@@ -16,15 +16,33 @@ export default function LivePreview({
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [size, setSize] = useState({ w: 0, h: 0 });
+    // Die eingebettete Seite läuft nur, solange die Kachel im Bild ist — sonst
+    // animieren vier fremde Webseiten gleichzeitig und bremsen das Scrollen aus.
+    const [active, setActive] = useState(false);
 
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
+
         const update = () => setSize({ w: el.offsetWidth, h: el.offsetHeight });
         update();
-        const obs = new ResizeObserver(update);
-        obs.observe(el);
-        return () => obs.disconnect();
+        const resizeObs = new ResizeObserver(update);
+        resizeObs.observe(el);
+
+        if (typeof IntersectionObserver === "undefined") {
+            setActive(true);
+            return () => resizeObs.disconnect();
+        }
+
+        const viewObs = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), {
+            rootMargin: "150px",
+        });
+        viewObs.observe(el);
+
+        return () => {
+            resizeObs.disconnect();
+            viewObs.disconnect();
+        };
     }, []);
 
     const scale = size.w / 1280;
@@ -45,7 +63,7 @@ export default function LivePreview({
             {/* Eingebettete Live-Seite */}
             <div ref={ref} className="pointer-events-none relative h-[300px] select-none overflow-hidden md:h-[360px]">
                 <img src={fallback} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-top" />
-                {scale > 0 && (
+                {active && scale > 0 && (
                     <iframe
                         src={href}
                         title={`Live-Vorschau: ${name}`}
