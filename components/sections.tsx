@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring, useMotionTemplate, useScroll } from "framer-motion";
+import { motion, useSpring, useScroll } from "framer-motion";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -256,13 +256,6 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function Sections() {
-    // Cursor-Lampe auch im unteren Seitenbereich
-    const cursorX = useMotionValue(-600);
-    const cursorY = useMotionValue(-600);
-    const spotX = useSpring(cursorX, { stiffness: 250, damping: 30 });
-    const spotY = useSpring(cursorY, { stiffness: 250, damping: 30 });
-    const lampGlow = useMotionTemplate`radial-gradient(circle 280px at ${spotX}px ${spotY}px, rgba(255,255,255,0.05) 0%, rgba(124,92,255,0.05) 35%, transparent 70%)`;
-
     // Prozess-Timeline: Linie füllt sich beim Scrollen mit Licht
     const journeyRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
@@ -272,19 +265,8 @@ export default function Sections() {
     const lineProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
     return (
-        <div
-            className="relative bg-[#0a0a0a]"
-            onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                cursorX.set(e.clientX - rect.left);
-                cursorY.set(e.clientY - rect.top);
-            }}
-            onMouseLeave={() => {
-                cursorX.set(-600);
-                cursorY.set(-600);
-            }}
-        >
-            {/* --- Hintergrund: Raster + Korn + Lampe (wie im Hero) --- */}
+        <div className="relative bg-[#0a0a0a]">
+            {/* --- Hintergrund: Raster + Korn (die Cursor-Lampe bleibt dem Hero vorbehalten) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div
                     className="absolute inset-0"
@@ -293,7 +275,6 @@ export default function Sections() {
                         backgroundSize: "26px 26px",
                     }}
                 />
-                <motion.div className="absolute inset-0" style={{ background: lampGlow }} />
                 <div
                     className="absolute inset-0 opacity-[0.05]"
                     style={{
