@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring, useMotionTemplate } from "framer-motion";
+import { motion, useMotionValue, useSpring, useMotionTemplate, useScroll } from "framer-motion";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -172,21 +172,37 @@ const SERVICES = [
     },
 ];
 
-const PROCESS = [
+// Die Reise vom ersten Hallo bis zum Launch (Zeitangaben = Platzhalter)
+const JOURNEY = [
     {
         nr: "01",
+        time: "Tag 1",
         title: "Erstgespräch",
-        text: "Kostenlos und unverbindlich, 30 Minuten. Wir hören zu: Was braucht euer Betrieb wirklich?",
+        text: "30 Minuten, kostenlos, ohne Fachchinesisch. Wir hören zu: Was macht euren Betrieb aus — und was soll die Seite für euch erledigen?",
     },
     {
         nr: "02",
+        time: "Tag 2–3",
         title: "Konzept & Festpreis",
-        text: "Ihr bekommt einen klaren Vorschlag mit Festpreis. Keine versteckten Kosten, keine Überraschungen.",
+        text: "Ihr bekommt einen klaren Plan: Aufbau, Inhalte, Zeitplan — und einen Festpreis, der hält. Keine versteckten Kosten, keine Überraschungen.",
     },
     {
         nr: "03",
-        title: "Umsetzung & Betreuung",
-        text: "Wir bauen, ihr gebt Feedback. Nach dem Start bleiben wir dran — Wartung, Updates, Erweiterungen.",
+        time: "Woche 1",
+        title: "Der erste Entwurf",
+        text: "Der Moment, auf den wir uns am meisten freuen: Ihr seht eure neue Seite zum ersten Mal. Live im Browser — nicht als PDF.",
+    },
+    {
+        nr: "04",
+        time: "Woche 2",
+        title: "Feinschliff",
+        text: "Ihr sagt, was besser geht — wir setzen um. So lange, bis ihr sagt: Genau so. Kurze Wege, schnelle Antworten.",
+    },
+    {
+        nr: "05",
+        time: "Woche 3–4",
+        title: "Launch & Betreuung",
+        text: "Eure Seite geht online: blitzschnell, Google-optimiert, auf jedem Gerät. Und danach bleiben wir dran — Wartung, Updates, neue Ideen.",
     },
 ];
 
@@ -246,6 +262,14 @@ export default function Sections() {
     const spotX = useSpring(cursorX, { stiffness: 250, damping: 30 });
     const spotY = useSpring(cursorY, { stiffness: 250, damping: 30 });
     const lampGlow = useMotionTemplate`radial-gradient(circle 280px at ${spotX}px ${spotY}px, rgba(255,255,255,0.05) 0%, rgba(124,92,255,0.05) 35%, transparent 70%)`;
+
+    // Prozess-Timeline: Linie füllt sich beim Scrollen mit Licht
+    const journeyRef = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: journeyRef,
+        offset: ["start 70%", "end 55%"],
+    });
+    const lineProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
     return (
         <div
@@ -367,18 +391,72 @@ export default function Sections() {
                 </div>
             </Section>
 
-            {/* --- 5 · Prozess --- */}
-            <Section id="prozess" kicker="So läuft es ab" title="In drei Schritten zur fertigen Lösung.">
-                <div className="grid gap-6 md:grid-cols-3">
-                    {PROCESS.map((step, i) => (
-                        <Reveal key={step.nr} delay={i * 0.15}>
-                            <div className="h-full rounded-2xl bg-neutral-900 p-8 ring-1 ring-white/10">
-                                <p className="text-5xl font-semibold text-accent/30">{step.nr}</p>
-                                <h3 className="mt-4 text-xl font-semibold text-neutral-50">{step.title}</h3>
-                                <p className="mt-2 text-sm leading-relaxed text-neutral-400">{step.text}</p>
-                            </div>
+            {/* --- 5 · Prozess: die Reise zum Launch --- */}
+            <Section id="prozess" kicker="So läuft es ab" title="Vom ersten Hallo bis zum Launch — eure Reise mit uns.">
+                <div ref={journeyRef} className="relative">
+                    {/* Grundlinie + Licht-Linie, die sich beim Scrollen füllt */}
+                    <div className="absolute left-4 top-0 h-full w-px bg-white/10 md:left-1/2" />
+                    <motion.div
+                        style={{ scaleY: lineProgress }}
+                        className="absolute left-4 top-0 h-full w-px origin-top bg-accent shadow-[0_0_12px_rgba(124,92,255,0.7)] md:left-1/2"
+                    />
+
+                    <div className="space-y-12 md:space-y-20">
+                        {JOURNEY.map((step, i) => {
+                            const leftSide = i % 2 === 0; // Desktop: abwechselnd links/rechts der Linie
+                            return (
+                                <Reveal key={step.nr}>
+                                    <div
+                                        className={`relative pl-12 md:w-1/2 md:pl-0 ${
+                                            leftSide ? "md:pr-16 md:text-right" : "md:ml-auto md:pl-16"
+                                        }`}
+                                    >
+                                        {/* Checkpoint: leuchtet auf, wenn er erreicht wird */}
+                                        <motion.span
+                                            className={`absolute left-4 top-1.5 z-10 h-3 w-3 -translate-x-1/2 rounded-full ring-4 ring-[#0a0a0a] md:left-auto ${
+                                                leftSide
+                                                    ? "md:right-0 md:translate-x-1/2"
+                                                    : "md:left-0 md:-translate-x-1/2"
+                                            }`}
+                                            initial={{ backgroundColor: "#404040", scale: 1, boxShadow: "0 0 0px rgba(124,92,255,0)" }}
+                                            whileInView={{
+                                                backgroundColor: "#7c5cff",
+                                                scale: 1.2,
+                                                boxShadow: "0 0 18px rgba(124,92,255,0.8)",
+                                            }}
+                                            viewport={{ once: true, margin: "-45% 0px -45% 0px" }}
+                                            transition={{ duration: 0.4 }}
+                                        />
+                                        <span className="inline-block rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+                                            {step.time}
+                                        </span>
+                                        <h3 className="mt-3 text-xl font-semibold text-neutral-50 md:text-2xl">
+                                            <span className="mr-2 text-accent/40">{step.nr}</span>
+                                            {step.title}
+                                        </h3>
+                                        <p className="mt-2 text-sm leading-relaxed text-neutral-400 md:text-base">{step.text}</p>
+                                    </div>
+                                </Reveal>
+                            );
+                        })}
+                    </div>
+
+                    {/* Launch-Moment am Ende der Linie */}
+                    <div className="relative mt-16 pl-12 text-left md:mt-24 md:pl-0 md:text-center">
+                        <span className="absolute left-4 top-1 flex h-4 w-4 -translate-x-1/2 md:left-1/2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                            <span className="relative inline-flex h-4 w-4 rounded-full bg-accent shadow-[0_0_20px_rgba(124,92,255,0.9)]" />
+                        </span>
+                        <Reveal>
+                            <p className="pt-1 text-sm text-neutral-400 md:pt-10">Bereit für den ersten Schritt?</p>
+                            <a
+                                href="#kontakt"
+                                className="mt-4 inline-block rounded-full bg-accent px-8 py-4 text-sm font-semibold tracking-wide text-white transition hover:bg-accent/80"
+                            >
+                                Startschuss geben
+                            </a>
                         </Reveal>
-                    ))}
+                    </div>
                 </div>
             </Section>
 
