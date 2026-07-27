@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
+import Link from "next/link";
 import { motion, useSpring, useScroll } from "framer-motion";
-
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
+import LivePreview from "@/components/live-preview";
+import { FEATURED_PROJECTS } from "@/components/projects-data";
 
 // --- Scroll-Reveal: Elemente fliegen beim Reinscrollen aus einem Blur ein ---
 function Reveal({
@@ -52,96 +53,6 @@ function Section({
             </Reveal>
             {children}
         </section>
-    );
-}
-
-// --- Daten (Platzhalter, später ergänzen) ---
-const FEATURED_PROJECTS = [
-    {
-        src: `${BASE}/referenzen/stadtmueller.jpg`,
-        name: "Stadtmüller Bedachungen",
-        category: "Dachdecker · Lampertheim",
-        result: "Neuer Webauftritt für über 80 Jahre Dachdecker-Handwerk.",
-        tags: ["Webdesign", "Entwicklung", "SEO"],
-        href: "https://bilal-altu.github.io/stadtmueller-bedachungen/",
-        domain: "stadtmueller-bedachungen",
-    },
-    {
-        src: `${BASE}/referenzen/gardinen-mannheim-dark.jpg`,
-        name: "Gardinen Mannheim",
-        category: "Studio für Fenster · Mannheim",
-        result: "Licht, Stoff, Raum — edler Auftritt für Maßkonfektion.",
-        tags: ["Webdesign", "Branding", "Texte"],
-        href: "https://bilal-altu.github.io/gardinenmannheim-studio/",
-        domain: "gardinenmannheim-studio",
-    },
-    {
-        src: `${BASE}/referenzen/kfz-nuri.jpg`,
-        name: "Ingenieurbüro Nuri",
-        category: "Kfz-Gutachten · Heppenheim",
-        result: "Gerichtsverwertbare Gutachten, vertrauenswürdig präsentiert.",
-        tags: ["Webdesign", "Entwicklung", "Local SEO"],
-        href: "https://nuri-ing.netlify.app/",
-        domain: "nuri-ing.netlify.app",
-    },
-    {
-        src: `${BASE}/referenzen/campingglueck.jpg`,
-        name: "Campingglück",
-        category: "Wohnmobil-Service",
-        result: "Werkstatt, Ausstattung und Service — alles aus einer Hand.",
-        tags: ["Webdesign", "Entwicklung"],
-        href: "https://bilal-altu.github.io/campingglueck/",
-        domain: "campingglueck",
-    },
-];
-
-// --- Live-Vorschau: bettet die echte Kundenseite verkleinert ein ---
-// Desktop-Breite 1280px wird per transform auf Kachelbreite skaliert;
-// bis die Seite geladen ist, liegt der Screenshot als Fallback darunter.
-function LivePreview({ href, fallback, name }: { href: string; fallback: string; name: string }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const [size, setSize] = useState({ w: 0, h: 0 });
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        const update = () => setSize({ w: el.offsetWidth, h: el.offsetHeight });
-        update();
-        const obs = new ResizeObserver(update);
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, []);
-
-    const scale = size.w / 1280;
-
-    return (
-        <div>
-            {/* Browser-Fenster-Leiste */}
-            <div className="flex items-center gap-2 border-b border-white/10 bg-neutral-950/60 px-4 py-2.5">
-                <span className="flex gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                </span>
-                <span className="ml-2 truncate rounded-md bg-white/5 px-3 py-0.5 text-[10px] tracking-wide text-neutral-500">
-                    {name}
-                </span>
-            </div>
-            {/* Eingebettete Live-Seite */}
-            <div ref={ref} className="pointer-events-none relative h-[300px] select-none overflow-hidden md:h-[360px]">
-                <img src={fallback} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-top" />
-                {scale > 0 && (
-                    <iframe
-                        src={href}
-                        title={`Live-Vorschau: ${name}`}
-                        loading="lazy"
-                        tabIndex={-1}
-                        className="absolute left-0 top-0 origin-top-left border-0 bg-[#0a0a0a]"
-                        style={{ width: 1280, height: Math.ceil(size.h / scale), transform: `scale(${scale})` }}
-                    />
-                )}
-            </div>
-        </div>
     );
 }
 
@@ -302,16 +213,17 @@ export default function Sections() {
 
             {/* --- 3 · Projekte --- */}
             <Section id="projekte" kicker="Ausgewählte Projekte" title="Echte Betriebe. Echte Ergebnisse.">
-                <div className="grid gap-6 md:grid-cols-2">
+                {/* Mobil: horizontales Wisch-Karussell · Desktop: 2×2-Raster */}
+                <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
                     {FEATURED_PROJECTS.map((p, i) => (
-                        <Reveal key={p.name} delay={(i % 2) * 0.15}>
+                        <Reveal key={p.name} delay={(i % 2) * 0.15} className="w-[85vw] max-w-[420px] flex-none snap-center md:w-auto md:max-w-none">
                             <a
                                 href={p.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group block overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-white/10 transition hover:ring-accent/60"
                             >
-                                <LivePreview href={p.href} fallback={p.src} name={p.domain} />
+                                <LivePreview href={p.href!} fallback={p.src} name={p.domain!} />
                                 <div className="p-6">
                                     <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">{p.category}</p>
                                     <h3 className="mt-1 text-xl font-semibold text-neutral-50">{p.name}</h3>
@@ -334,11 +246,14 @@ export default function Sections() {
                         </Reveal>
                     ))}
                 </div>
+                <p className="mt-3 text-center text-xs text-neutral-600 md:hidden">← wischen →</p>
                 <Reveal className="mt-8">
-                    <p className="text-sm text-neutral-500">
-                        + 4 weitere Projekte — von Erdbau bis Gebäudereinigung. Tipp: Fahre im Hero oben mit der Maus über die
-                        Karten.
-                    </p>
+                    <Link
+                        href="/referenzen"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-neutral-300 transition hover:text-accent"
+                    >
+                        Alle 8 Referenzen ansehen <span aria-hidden>→</span>
+                    </Link>
                 </Reveal>
             </Section>
 
