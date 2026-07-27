@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
 
 // --- Types ---
 export type AnimationPhase = "scatter" | "line" | "circle" | "bottom-strip";
@@ -194,9 +194,15 @@ export default function IntroAnimation() {
     const scrollRotate = useTransform(virtualScroll, [600, 3000], [0, 360]);
     const smoothScrollRotate = useSpring(scrollRotate, { stiffness: 40, damping: 20 });
 
-    // --- Mouse Parallax ---
+    // --- Mouse Parallax + Cursor-Lampe ---
     const mouseX = useMotionValue(0);
     const smoothMouseX = useSpring(mouseX, { stiffness: 30, damping: 20 });
+
+    // Cursor-Position in px (startet außerhalb, damit ohne Maus keine Lampe sichtbar ist)
+    const cursorX = useMotionValue(-600);
+    const cursorY = useMotionValue(-600);
+    const spotX = useSpring(cursorX, { stiffness: 250, damping: 30 });
+    const spotY = useSpring(cursorY, { stiffness: 250, damping: 30 });
 
     useEffect(() => {
         const container = containerRef.current;
@@ -205,15 +211,31 @@ export default function IntroAnimation() {
         const handleMouseMove = (e: MouseEvent) => {
             const rect = container.getBoundingClientRect();
             const relativeX = e.clientX - rect.left;
+            const relativeY = e.clientY - rect.top;
 
             // Normalize -1 to 1
             const normalizedX = (relativeX / rect.width) * 2 - 1;
             // Move +/- 100px
             mouseX.set(normalizedX * 100);
+
+            cursorX.set(relativeX);
+            cursorY.set(relativeY);
+        };
+        const handleMouseLeave = () => {
+            cursorX.set(-600);
+            cursorY.set(-600);
         };
         container.addEventListener("mousemove", handleMouseMove);
-        return () => container.removeEventListener("mousemove", handleMouseMove);
-    }, [mouseX]);
+        container.addEventListener("mouseleave", handleMouseLeave);
+        return () => {
+            container.removeEventListener("mousemove", handleMouseMove);
+            container.removeEventListener("mouseleave", handleMouseLeave);
+        };
+    }, [mouseX, cursorX, cursorY]);
+
+    // Lampen-Schein + Maske, die das Punktraster unterm Cursor aufdeckt
+    const lampGlow = useMotionTemplate`radial-gradient(circle 280px at ${spotX}px ${spotY}px, rgba(255,255,255,0.07) 0%, rgba(124,92,255,0.06) 35%, transparent 70%)`;
+    const lampMask = useMotionTemplate`radial-gradient(circle 220px at ${spotX}px ${spotY}px, black 0%, transparent 75%)`;
 
     // --- Intro Sequence ---
     useEffect(() => {
@@ -274,6 +296,21 @@ export default function IntroAnimation() {
                         backgroundSize: "26px 26px",
                         maskImage: "radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 78%)",
                         WebkitMaskImage: "radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 78%)",
+                    }}
+                />
+                {/* Cursor-Lampe: weicher Lichtschein ... */}
+                <motion.div
+                    className="absolute inset-0"
+                    style={{ background: lampGlow }}
+                />
+                {/* ... und hellere Rasterpunkte im Lichtkegel */}
+                <motion.div
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
+                        backgroundSize: "26px 26px",
+                        maskImage: lampMask,
+                        WebkitMaskImage: lampMask,
                     }}
                 />
                 {/* Filmkorn */}
