@@ -23,19 +23,26 @@ const IMG_WIDTH = 60;
 const IMG_HEIGHT = 85;
 
 function FlipCard({ project, index, target }: FlipCardProps) {
+    // Beim Hover richtet sich die Karte gerade auf und flippt dann —
+    // sonst dreht sie sich um ihre schräge Achse und wirkt windschief
+    const [hovered, setHovered] = useState(false);
     return (
         <motion.div
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
             animate={{
                 x: target.x,
                 y: target.y,
-                rotate: target.rotation,
-                scale: target.scale,
+                rotate: hovered ? 0 : target.rotation,
+                scale: hovered ? target.scale * 1.12 : target.scale,
                 opacity: target.opacity,
             }}
             transition={{
                 type: "spring",
                 stiffness: 40,
                 damping: 15,
+                rotate: { type: "spring", stiffness: 150, damping: 20 },
+                scale: { type: "spring", stiffness: 150, damping: 20 },
             }}
             style={{
                 position: "absolute",
@@ -43,14 +50,15 @@ function FlipCard({ project, index, target }: FlipCardProps) {
                 height: IMG_HEIGHT,
                 transformStyle: "preserve-3d",
                 perspective: "1000px",
+                zIndex: hovered ? 30 : "auto",
             }}
             className="cursor-pointer group"
         >
             <motion.div
                 className="relative h-full w-full"
                 style={{ transformStyle: "preserve-3d" }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
-                whileHover={{ rotateY: 180 }}
+                animate={{ rotateY: hovered ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 170, damping: 22 }}
             >
                 {/* Front Face */}
                 <div
@@ -67,14 +75,15 @@ function FlipCard({ project, index, target }: FlipCardProps) {
 
                 {/* Back Face */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/40 bg-neutral-900 flex flex-col items-center justify-center p-1.5 border border-neutral-700"
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/40 bg-neutral-900 flex flex-col items-center justify-center p-2 border border-accent/40"
                     style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                 >
-                    <div className="text-center">
-                        <p className="text-[6px] font-bold text-accent uppercase tracking-widest mb-1">
+                    <div className="text-center" style={{ hyphens: "auto" }} lang="de">
+                        <p className="mb-1 text-[7px] font-bold uppercase tracking-wide text-accent break-words">
                             {project.category}
                         </p>
-                        <p className="text-[9px] leading-tight font-medium text-white">
+                        <div className="mx-auto mb-1 h-px w-5 bg-white/20" />
+                        <p className="text-[10px] leading-snug font-semibold text-white break-words">
                             {project.name}
                         </p>
                     </div>
