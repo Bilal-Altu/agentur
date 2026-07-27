@@ -149,9 +149,15 @@ export default function IntroAnimation() {
         if (!container) return;
 
         const handleWheel = (e: WheelEvent) => {
-            // Prevent default to stop browser overscroll/bounce
-            e.preventDefault();
+            // Hero fängt das Scrollen nur ab, solange seine Animation läuft —
+            // danach (bzw. beim Hochscrollen erst wieder am Seitenanfang) scrollt die Seite normal
+            const goingDown = e.deltaY > 0;
+            const heroActive = goingDown
+                ? scrollRef.current < MAX_SCROLL
+                : window.scrollY <= 0 && scrollRef.current > 0;
+            if (!heroActive) return;
 
+            e.preventDefault();
             const newScroll = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
@@ -167,6 +173,13 @@ export default function IntroAnimation() {
             const deltaY = touchStartY - touchY;
             touchStartY = touchY;
 
+            const goingDown = deltaY > 0;
+            const heroActive = goingDown
+                ? scrollRef.current < MAX_SCROLL
+                : window.scrollY <= 0 && scrollRef.current > 0;
+            if (!heroActive) return;
+
+            e.preventDefault();
             const newScroll = Math.min(Math.max(scrollRef.current + deltaY, 0), MAX_SCROLL);
             scrollRef.current = newScroll;
             virtualScroll.set(newScroll);
