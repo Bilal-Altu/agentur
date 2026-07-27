@@ -163,14 +163,27 @@ export default function IntroAnimation() {
             virtualScroll.set(newScroll);
         };
 
-        // Touch support
+        // Touch: 2,5-fach beschleunigt und mit Ausroll-Schwung,
+        // sonst braucht die Sequenz zu viele Wische und fühlt sich zäh an
+        const TOUCH_SPEED = 2.5;
         let touchStartY = 0;
+        let touchVelocity = 0;
+        let momentumFrame = 0;
+
+        const applyScroll = (delta: number) => {
+            const newScroll = Math.min(Math.max(scrollRef.current + delta, 0), MAX_SCROLL);
+            scrollRef.current = newScroll;
+            virtualScroll.set(newScroll);
+        };
+
         const handleTouchStart = (e: TouchEvent) => {
+            cancelAnimationFrame(momentumFrame);
+            touchVelocity = 0;
             touchStartY = e.touches[0].clientY;
         };
         const handleTouchMove = (e: TouchEvent) => {
             const touchY = e.touches[0].clientY;
-            const deltaY = touchStartY - touchY;
+            const deltaY = (touchStartY - touchY) * TOUCH_SPEED;
             touchStartY = touchY;
 
             const goingDown = deltaY > 0;
@@ -180,20 +193,37 @@ export default function IntroAnimation() {
             if (!heroActive) return;
 
             e.preventDefault();
-            const newScroll = Math.min(Math.max(scrollRef.current + deltaY, 0), MAX_SCROLL);
-            scrollRef.current = newScroll;
-            virtualScroll.set(newScroll);
+            touchVelocity = deltaY;
+            applyScroll(deltaY);
+        };
+        const handleTouchEnd = () => {
+            // Schwung nach dem Loslassen ausrollen lassen (wie natives Scrollen)
+            const step = () => {
+                touchVelocity *= 0.94;
+                if (Math.abs(touchVelocity) < 0.5) return;
+                const goingDown = touchVelocity > 0;
+                const heroActive = goingDown
+                    ? scrollRef.current < MAX_SCROLL
+                    : window.scrollY <= 0 && scrollRef.current > 0;
+                if (!heroActive) return;
+                applyScroll(touchVelocity);
+                momentumFrame = requestAnimationFrame(step);
+            };
+            momentumFrame = requestAnimationFrame(step);
         };
 
         // Attach listeners to container instead of window for portability
         container.addEventListener("wheel", handleWheel, { passive: false });
         container.addEventListener("touchstart", handleTouchStart, { passive: false });
         container.addEventListener("touchmove", handleTouchMove, { passive: false });
+        container.addEventListener("touchend", handleTouchEnd);
 
         return () => {
             container.removeEventListener("wheel", handleWheel);
             container.removeEventListener("touchstart", handleTouchStart);
             container.removeEventListener("touchmove", handleTouchMove);
+            container.removeEventListener("touchend", handleTouchEnd);
+            cancelAnimationFrame(momentumFrame);
         };
     }, [virtualScroll]);
 
