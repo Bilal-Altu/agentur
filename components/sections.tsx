@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useMotionTemplate } from "framer-motion";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -63,7 +63,8 @@ const FEATURED_PROJECTS = [
         category: "Dachdecker · Lampertheim",
         result: "Neuer Webauftritt für über 80 Jahre Dachdecker-Handwerk.",
         tags: ["Webdesign", "Entwicklung", "SEO"],
-        href: "#", // TODO: Live-URL ergänzen
+        href: "https://bilal-altu.github.io/stadtmueller-bedachungen/",
+        domain: "stadtmueller-bedachungen",
     },
     {
         src: `${BASE}/referenzen/gardinen-mannheim-dark.jpg`,
@@ -71,7 +72,8 @@ const FEATURED_PROJECTS = [
         category: "Studio für Fenster · Mannheim",
         result: "Licht, Stoff, Raum — edler Auftritt für Maßkonfektion.",
         tags: ["Webdesign", "Branding", "Texte"],
-        href: "#", // TODO: Live-URL ergänzen
+        href: "https://bilal-altu.github.io/gardinenmannheim-studio/",
+        domain: "gardinenmannheim-studio",
     },
     {
         src: `${BASE}/referenzen/kfz-nuri.jpg`,
@@ -79,7 +81,8 @@ const FEATURED_PROJECTS = [
         category: "Kfz-Gutachten · Heppenheim",
         result: "Gerichtsverwertbare Gutachten, vertrauenswürdig präsentiert.",
         tags: ["Webdesign", "Entwicklung", "Local SEO"],
-        href: "#", // TODO: Live-URL ergänzen
+        href: "https://nuri-ing.netlify.app/",
+        domain: "nuri-ing.netlify.app",
     },
     {
         src: `${BASE}/referenzen/campingglueck.jpg`,
@@ -87,9 +90,60 @@ const FEATURED_PROJECTS = [
         category: "Wohnmobil-Service",
         result: "Werkstatt, Ausstattung und Service — alles aus einer Hand.",
         tags: ["Webdesign", "Entwicklung"],
-        href: "#", // TODO: Live-URL ergänzen
+        href: "https://bilal-altu.github.io/campingglueck/",
+        domain: "campingglueck",
     },
 ];
+
+// --- Live-Vorschau: bettet die echte Kundenseite verkleinert ein ---
+// Desktop-Breite 1280px wird per transform auf Kachelbreite skaliert;
+// bis die Seite geladen ist, liegt der Screenshot als Fallback darunter.
+function LivePreview({ href, fallback, name }: { href: string; fallback: string; name: string }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [size, setSize] = useState({ w: 0, h: 0 });
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const update = () => setSize({ w: el.offsetWidth, h: el.offsetHeight });
+        update();
+        const obs = new ResizeObserver(update);
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
+    const scale = size.w / 1280;
+
+    return (
+        <div>
+            {/* Browser-Fenster-Leiste */}
+            <div className="flex items-center gap-2 border-b border-white/10 bg-neutral-950/60 px-4 py-2.5">
+                <span className="flex gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                </span>
+                <span className="ml-2 truncate rounded-md bg-white/5 px-3 py-0.5 text-[10px] tracking-wide text-neutral-500">
+                    {name}
+                </span>
+            </div>
+            {/* Eingebettete Live-Seite */}
+            <div ref={ref} className="pointer-events-none relative h-[300px] select-none overflow-hidden md:h-[360px]">
+                <img src={fallback} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-top" />
+                {scale > 0 && (
+                    <iframe
+                        src={href}
+                        title={`Live-Vorschau: ${name}`}
+                        loading="lazy"
+                        tabIndex={-1}
+                        className="absolute left-0 top-0 origin-top-left border-0 bg-[#0a0a0a]"
+                        style={{ width: 1280, height: Math.ceil(size.h / scale), transform: `scale(${scale})` }}
+                    />
+                )}
+            </div>
+        </div>
+    );
+}
 
 const SERVICES = [
     {
@@ -248,21 +302,16 @@ export default function Sections() {
                         <Reveal key={p.name} delay={(i % 2) * 0.15}>
                             <a
                                 href={p.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group block overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-white/10 transition hover:ring-accent/60"
                             >
-                                <div className="relative h-[320px] overflow-hidden md:h-[380px]">
-                                    <img
-                                        src={p.src}
-                                        alt={`Webseite von ${p.name}`}
-                                        className="w-full transition-transform duration-[2500ms] ease-linear group-hover:-translate-y-[55%]"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent" />
-                                </div>
+                                <LivePreview href={p.href} fallback={p.src} name={p.domain} />
                                 <div className="p-6">
                                     <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">{p.category}</p>
                                     <h3 className="mt-1 text-xl font-semibold text-neutral-50">{p.name}</h3>
                                     <p className="mt-2 text-sm leading-relaxed text-neutral-400">{p.result}</p>
-                                    <div className="mt-4 flex flex-wrap gap-2">
+                                    <div className="mt-4 flex flex-wrap items-center gap-2">
                                         {p.tags.map((t) => (
                                             <span
                                                 key={t}
@@ -271,6 +320,9 @@ export default function Sections() {
                                                 {t}
                                             </span>
                                         ))}
+                                        <span className="ml-auto text-[11px] font-medium tracking-wide text-neutral-500 transition group-hover:text-accent">
+                                            Live ansehen ↗
+                                        </span>
                                     </div>
                                 </div>
                             </a>
