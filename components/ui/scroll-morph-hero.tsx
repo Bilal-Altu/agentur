@@ -260,12 +260,13 @@ export default function IntroAnimation() {
             <div className="flex h-full w-full flex-col items-center justify-center perspective-1000">
 
                 {/* Intro Text (Fades out) */}
-                <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2 px-4">
+                {/* Textbreite bleibt innerhalb des Kartenkreises (Radius ≈ min(38vmin, 350px)) */}
+                <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2 max-w-[min(46vmin,540px)]">
                     <motion.h1
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 1 }}
-                        className="text-2xl font-medium tracking-tight text-neutral-100 md:text-4xl"
+                        className="text-lg font-medium tracking-tight text-neutral-100 sm:text-2xl md:text-3xl lg:text-4xl"
                     >
                         Wir bauen digitale Auftritte, die arbeiten.
                     </motion.h1>
@@ -273,7 +274,7 @@ export default function IntroAnimation() {
                         initial={{ opacity: 0 }}
                         animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 0.5 - morphValue } : { opacity: 0 }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className="mt-4 text-xs font-bold tracking-[0.2em] text-neutral-500"
+                        className="mt-3 text-[9px] font-bold tracking-[0.2em] text-neutral-500 md:text-xs"
                     >
                         SCROLLEN ZUM ENTDECKEN
                     </motion.p>
@@ -315,7 +316,8 @@ export default function IntroAnimation() {
                             const minDimension = Math.min(containerSize.width, containerSize.height);
 
                             // A. Calculate Circle Position
-                            const circleRadius = Math.min(minDimension * 0.35, 350);
+                            // Mobil etwas größerer Radius, damit der Text im Kreis Platz hat
+                            const circleRadius = Math.min(minDimension * (isMobile ? 0.38 : 0.35), 350);
 
                             const circleAngle = (i / TOTAL_IMAGES) * 360;
                             const circleRad = (circleAngle * Math.PI) / 180;
