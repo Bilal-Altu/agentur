@@ -256,6 +256,43 @@ export default function IntroAnimation() {
 
     return (
         <div ref={containerRef} className="relative w-full h-full bg-[#0a0a0a] overflow-hidden">
+            {/* --- Hintergrund-Ebenen (rein dekorativ) --- */}
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+                {/* Akzent-Glow: wandert beim Morph mit den Karten nach unten */}
+                <div
+                    className="absolute left-1/2 top-1/2 h-[120vmin] w-[120vmin] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                    style={{
+                        background: "radial-gradient(circle, rgba(124,92,255,0.16) 0%, rgba(124,92,255,0.05) 35%, transparent 65%)",
+                        transform: `translate(-50%, calc(-50% + ${morphValue * 22}vh)) scale(${1 + morphValue * 0.25})`,
+                    }}
+                />
+                {/* Feines Punktraster, zu den Rändern ausgeblendet */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+                        backgroundSize: "26px 26px",
+                        maskImage: "radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 78%)",
+                        WebkitMaskImage: "radial-gradient(ellipse 75% 75% at 50% 50%, black 30%, transparent 78%)",
+                    }}
+                />
+                {/* Filmkorn */}
+                <div
+                    className="absolute inset-0 opacity-[0.05]"
+                    style={{
+                        backgroundImage:
+                            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                    }}
+                />
+                {/* Vignette */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%)",
+                    }}
+                />
+            </div>
+
             {/* Container */}
             <div className="flex h-full w-full flex-col items-center justify-center perspective-1000">
 
