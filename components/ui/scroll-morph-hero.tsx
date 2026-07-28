@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
+import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, useScroll } from "framer-motion";
 
 // --- Types ---
 export type AnimationPhase = "scatter" | "line" | "circle" | "bottom-strip";
@@ -94,7 +94,6 @@ function FlipCard({ project, index, target }: FlipCardProps) {
 }
 
 // --- Main Hero Component ---
-const MAX_SCROLL = 3000; // Virtual scroll range
 
 // Referenzprojekte (echte Kundenwebseiten)
 // basePath-Präfix nötig, weil <img src> von Next.js nicht automatisch umgeschrieben wird
@@ -149,102 +148,23 @@ export default function IntroAnimation() {
         return () => observer.disconnect();
     }, []);
 
-    // --- Virtual Scroll Logic ---
-    const virtualScroll = useMotionValue(0);
-    const scrollRef = useRef(0); // Keep track of scroll value without re-renders
+    // --- Scroll-Steuerung ---
+    // Der Hero klebt (sticky) in einer hohen Sektion: Die Animation läuft mit dem
+    // echten Seiten-Scroll ab, statt Mausrad und Touch abzufangen. Dadurch bleiben
+    // Trackpad-Schwung, Scrollbalken, Tastatur und der Übergang zu den Sektionen sauber.
+    const sectionRef = useRef<HTMLElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ['start start', 'end end'],
+    });
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+    // 1. Morph: Kreis -> Bogen, im ersten Drittel des Scrollwegs
+    const morphProgress = useTransform(scrollYProgress, [0, 0.34], [0, 1]);
+    const smoothMorph = useSpring(morphProgress, { stiffness: 90, damping: 26, restDelta: 0.0005 });
 
-        const handleWheel = (e: WheelEvent) => {
-            // Hero fängt das Scrollen nur ab, solange seine Animation läuft —
-            // danach (bzw. beim Hochscrollen erst wieder am Seitenanfang) scrollt die Seite normal
-            const goingDown = e.deltaY > 0;
-            const heroActive = goingDown
-                ? scrollRef.current < MAX_SCROLL
-                : window.scrollY <= 0 && scrollRef.current > 0;
-            if (!heroActive) return;
-
-            e.preventDefault();
-            const newScroll = Math.min(Math.max(scrollRef.current + e.deltaY, 0), MAX_SCROLL);
-            scrollRef.current = newScroll;
-            virtualScroll.set(newScroll);
-        };
-
-        // Touch: 2,5-fach beschleunigt und mit Ausroll-Schwung,
-        // sonst braucht die Sequenz zu viele Wische und fühlt sich zäh an
-        const TOUCH_SPEED = 2.5;
-        let touchStartY = 0;
-        let touchVelocity = 0;
-        let momentumFrame = 0;
-
-        const applyScroll = (delta: number) => {
-            const newScroll = Math.min(Math.max(scrollRef.current + delta, 0), MAX_SCROLL);
-            scrollRef.current = newScroll;
-            virtualScroll.set(newScroll);
-        };
-
-        const handleTouchStart = (e: TouchEvent) => {
-            cancelAnimationFrame(momentumFrame);
-            touchVelocity = 0;
-            touchStartY = e.touches[0].clientY;
-        };
-        const handleTouchMove = (e: TouchEvent) => {
-            const touchY = e.touches[0].clientY;
-            const deltaY = (touchStartY - touchY) * TOUCH_SPEED;
-            touchStartY = touchY;
-
-            const goingDown = deltaY > 0;
-            const heroActive = goingDown
-                ? scrollRef.current < MAX_SCROLL
-                : window.scrollY <= 0 && scrollRef.current > 0;
-            if (!heroActive) return;
-
-            e.preventDefault();
-            touchVelocity = deltaY;
-            applyScroll(deltaY);
-        };
-        const handleTouchEnd = () => {
-            // Schwung nach dem Loslassen ausrollen lassen (wie natives Scrollen)
-            const step = () => {
-                touchVelocity *= 0.94;
-                if (Math.abs(touchVelocity) < 0.5) return;
-                const goingDown = touchVelocity > 0;
-                const heroActive = goingDown
-                    ? scrollRef.current < MAX_SCROLL
-                    : window.scrollY <= 0 && scrollRef.current > 0;
-                if (!heroActive) return;
-                applyScroll(touchVelocity);
-                momentumFrame = requestAnimationFrame(step);
-            };
-            momentumFrame = requestAnimationFrame(step);
-        };
-
-        // Attach listeners to container instead of window for portability
-        container.addEventListener("wheel", handleWheel, { passive: false });
-        container.addEventListener("touchstart", handleTouchStart, { passive: false });
-        container.addEventListener("touchmove", handleTouchMove, { passive: false });
-        container.addEventListener("touchend", handleTouchEnd);
-
-        return () => {
-            container.removeEventListener("wheel", handleWheel);
-            container.removeEventListener("touchstart", handleTouchStart);
-            container.removeEventListener("touchmove", handleTouchMove);
-            container.removeEventListener("touchend", handleTouchEnd);
-            cancelAnimationFrame(momentumFrame);
-        };
-    }, [virtualScroll]);
-
-    // 1. Morph Progress: 0 (Circle) -> 1 (Bottom Arc)
-    // Happens between scroll 0 and 600
-    const morphProgress = useTransform(virtualScroll, [0, 600], [0, 1]);
-    const smoothMorph = useSpring(morphProgress, { stiffness: 40, damping: 20 });
-
-    // 2. Scroll Rotation (Shuffling): Starts after morph (e.g., > 600)
-    // Rotates the bottom arc as user continues scrolling
-    const scrollRotate = useTransform(virtualScroll, [600, 3000], [0, 360]);
-    const smoothScrollRotate = useSpring(scrollRotate, { stiffness: 40, damping: 20 });
+    // 2. Danach wandern die Karten im Bogen weiter
+    const scrollRotate = useTransform(scrollYProgress, [0.34, 1], [0, 360]);
+    const smoothScrollRotate = useSpring(scrollRotate, { stiffness: 90, damping: 26, restDelta: 0.0005 });
 
     // --- Mouse Parallax + Cursor-Lampe ---
     const mouseX = useMotionValue(0);
@@ -291,6 +211,12 @@ export default function IntroAnimation() {
 
     // --- Intro Sequence ---
     useEffect(() => {
+        // Beim Neuladen mitten auf der Seite direkt in den Kreis springen,
+        // statt das Intro unsichtbar im Hintergrund abzuspielen
+        if (window.scrollY > 40) {
+            setIntroPhase("circle");
+            return;
+        }
         const timer1 = setTimeout(() => setIntroPhase("line"), 500);
         const timer2 = setTimeout(() => setIntroPhase("circle"), 2500);
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
@@ -329,7 +255,9 @@ export default function IntroAnimation() {
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
 
     return (
-        <div ref={containerRef} className="relative w-full h-full bg-[#0a0a0a] overflow-hidden">
+        // Hohe Sektion gibt den Scrollweg vor; der Hero bleibt darin stehen (sticky)
+        <section ref={sectionRef} className="relative h-[240vh]">
+        <div ref={containerRef} className="sticky top-0 h-svh w-full bg-[#0a0a0a] overflow-hidden">
             {/* --- Hintergrund-Ebenen (rein dekorativ) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
                 {/* Akzent-Glow: wandert beim Morph mit den Karten nach unten */}
@@ -502,5 +430,6 @@ export default function IntroAnimation() {
                 </div>
             </div>
         </div>
+        </section>
     );
 }

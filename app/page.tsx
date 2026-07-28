@@ -18,9 +18,7 @@ export default function Home() {
         </nav>
       </header>
 
-      <div className="h-svh w-full">
-        <IntroAnimation />
-      </div>
+      <IntroAnimation />
 
       <Sections />
     </main>
