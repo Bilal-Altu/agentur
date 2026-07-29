@@ -378,8 +378,8 @@ export default function Sections() {
                     </Reveal>
                     <div className="flex gap-6">
                         {[
-                            ["B", "Bilal", "[Rolle ergänzen]"],
-                            ["A", "Alex", "[Rolle ergänzen]"],
+                            ["B", "Bilal Altuntas", "[Rolle ergänzen]"],
+                            ["A", "Alex Kodalis", "[Rolle ergänzen]"],
                         ].map(([initial, name, role], i) => (
                             <Reveal key={name} delay={i * 0.15}>
                                 <div className="text-center">

@@ -277,9 +277,19 @@ export default function IntroAnimation() {
     const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
 
+    // Abgang: Karten und Text lösen sich am Ende des Scrollwegs auf, damit der Hero
+    // nicht als leere schwarze Fläche nach oben wegfährt
+    const exitOpacity = useTransform(scrollYProgress, [0.82, 0.99], [1, 0]);
+    const exitY = useTransform(scrollYProgress, [0.82, 0.99], [0, -70]);
+    // Bogen-Text: erst einblenden, am Ende mit ausblenden
+    const arcTextOpacity = useTransform(
+        [contentOpacity, exitOpacity],
+        ([fadeIn, fadeOut]: number[]) => fadeIn * fadeOut
+    );
+
     return (
         // Hohe Sektion gibt den Scrollweg vor; der Hero bleibt darin stehen (sticky)
-        <section ref={sectionRef} className="relative h-[240vh]">
+        <section ref={sectionRef} className="relative h-[200vh]">
         <div ref={containerRef} className="sticky top-0 h-svh w-full bg-surface overflow-hidden">
             {/* --- Hintergrund-Ebenen (rein dekorativ) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -359,7 +369,7 @@ export default function IntroAnimation() {
 
                 {/* Arc Active Content (Fades in) */}
                 <motion.div
-                    style={{ opacity: contentOpacity, y: contentY }}
+                    style={{ opacity: arcTextOpacity, y: contentY }}
                     className="absolute top-[10%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
                     <h2 className="text-3xl md:text-5xl font-semibold text-neutral-50 tracking-tight mb-4">
@@ -373,7 +383,10 @@ export default function IntroAnimation() {
                 </motion.div>
 
                 {/* Main Container */}
-                <div className="relative flex items-center justify-center w-full h-full">
+                <motion.div
+                    style={{ opacity: exitOpacity, y: exitY }}
+                    className="relative flex items-center justify-center w-full h-full"
+                >
                     {CARDS.map((project, i) => {
                         let target = { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1 };
 
@@ -450,8 +463,15 @@ export default function IntroAnimation() {
                             />
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
+
+            {/* Weicher Abschluss zur nächsten Sektion */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-40"
+                style={{ background: "linear-gradient(to bottom, transparent, var(--surface))" }}
+            />
         </div>
         </section>
     );
