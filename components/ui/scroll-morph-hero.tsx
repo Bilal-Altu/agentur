@@ -62,7 +62,7 @@ function FlipCard({ project, index, target }: FlipCardProps) {
             >
                 {/* Front Face */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/40 bg-neutral-800 ring-1 ring-white/10"
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/50 bg-surface-strong ring-1 ring-white/10"
                     style={{ backfaceVisibility: "hidden" }}
                 >
                     <img
@@ -73,19 +73,38 @@ function FlipCard({ project, index, target }: FlipCardProps) {
                     <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-transparent" />
                 </div>
 
-                {/* Back Face */}
+                {/* Back Face — Glasoptik nach Vorbild des Mastericons */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/40 bg-neutral-900 flex flex-col items-center justify-center p-2 border border-accent/40"
-                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg shadow-black/50 ring-1 ring-white/10"
+                    style={{
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                        background: "linear-gradient(150deg, #17171f 0%, #0e0e10 55%, #0a0a0b 100%)",
+                    }}
                 >
-                    <div className="text-center" style={{ hyphens: "auto" }} lang="de">
-                        <p className="mb-1 text-[7px] font-bold uppercase tracking-wide text-accent break-words">
-                            {project.category}
-                        </p>
-                        <div className="mx-auto mb-1 h-px w-5 bg-white/20" />
-                        <p className="text-[10px] leading-snug font-semibold text-white break-words">
+                    {/* Lichtkante oben */}
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+                    {/* Farbschimmer aus der Ecke */}
+                    <span
+                        className="pointer-events-none absolute -left-5 -top-6 h-20 w-20 rounded-full"
+                        style={{ background: "radial-gradient(circle, rgba(123,92,255,0.4) 0%, transparent 70%)" }}
+                    />
+                    <span
+                        className="pointer-events-none absolute -bottom-8 -right-6 h-20 w-20 rounded-full"
+                        style={{ background: "radial-gradient(circle, rgba(255,45,161,0.22) 0%, transparent 70%)" }}
+                    />
+                    <div
+                        className="relative flex h-full flex-col items-center justify-center px-2 text-center"
+                        style={{ hyphens: "auto" }}
+                        lang="de"
+                    >
+                        <p className="text-[9px] font-semibold leading-tight text-white break-words">
                             {project.name}
                         </p>
+                        <p className="mt-1 text-[6px] font-medium uppercase tracking-[0.12em] text-muted break-words">
+                            {project.category}
+                        </p>
+                        <span className="mt-2 h-px w-5 bg-gradient-to-r from-violet to-pink" />
                     </div>
                 </div>
             </motion.div>
