@@ -94,17 +94,21 @@ function FlipCard({ project, index, target }: FlipCardProps) {
                         style={{ background: "radial-gradient(circle, rgba(255,45,161,0.22) 0%, transparent 70%)" }}
                     />
                     <div
-                        className="relative flex h-full flex-col items-center justify-center px-2 text-center"
-                        style={{ hyphens: "auto" }}
+                        className="relative flex h-full flex-col items-center justify-center px-1.5 text-center"
+                        style={{
+                            hyphens: "auto",
+                            textRendering: "geometricPrecision",
+                            WebkitFontSmoothing: "antialiased",
+                        }}
                         lang="de"
                     >
-                        <p className="text-[9px] font-semibold leading-tight text-white break-words">
+                        <p className="text-[7.5px] font-semibold leading-[1.15] tracking-[-0.01em] text-white break-words">
                             {project.name}
                         </p>
-                        <p className="mt-1 text-[6px] font-medium uppercase tracking-[0.12em] text-muted break-words">
+                        <p className="mt-[3px] text-[5px] font-semibold uppercase leading-none tracking-[0.16em] text-white/55 break-words">
                             {project.category}
                         </p>
-                        <span className="mt-2 h-px w-5 bg-gradient-to-r from-violet to-pink" />
+                        <span className="mt-1.5 h-px w-4 bg-gradient-to-r from-violet to-pink" />
                     </div>
                 </div>
             </motion.div>
