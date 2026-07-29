@@ -257,7 +257,7 @@ export default function IntroAnimation() {
     return (
         // Hohe Sektion gibt den Scrollweg vor; der Hero bleibt darin stehen (sticky)
         <section ref={sectionRef} className="relative h-[240vh]">
-        <div ref={containerRef} className="sticky top-0 h-svh w-full bg-background overflow-hidden">
+        <div ref={containerRef} className="sticky top-0 h-svh w-full bg-surface overflow-hidden">
             {/* --- Hintergrund-Ebenen (rein dekorativ) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
                 {/* Akzent-Glow: wandert beim Morph mit den Karten nach unten */}

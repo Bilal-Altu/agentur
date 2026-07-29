@@ -177,13 +177,13 @@ export default function Sections() {
     const lineProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
     return (
-        <div className="relative bg-background">
+        <div className="relative bg-surface">
             {/* --- Hintergrund: Raster + Korn (die Cursor-Lampe bleibt dem Hero vorbehalten) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div
                     className="absolute inset-0"
                     style={{
-                        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)",
+                        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
                         backgroundSize: "26px 26px",
                     }}
                 />

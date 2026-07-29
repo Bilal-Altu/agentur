@@ -35,11 +35,13 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--background);
+  /* Seitengrund ist die hellere Markenfläche — reines #050505 wirkt zu dunkel */
+  background: var(--surface);
 }
 
 body {
-  background: var(--background);
+  /* Seitengrund ist die hellere Markenfläche — reines #050505 wirkt zu dunkel */
+  background: var(--surface);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   text-rendering: optimizeLegibility;

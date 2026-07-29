@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 export default function ReferenzenPage() {
   return (
-    <main className="relative min-h-svh bg-background">
+    <main className="relative min-h-svh bg-surface">
       {/* Dezenter Hintergrund wie auf der Startseite */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)",
           backgroundSize: "26px 26px",
         }}
       />

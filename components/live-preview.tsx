@@ -69,7 +69,7 @@ export default function LivePreview({
                         title={`Live-Vorschau: ${name}`}
                         loading="lazy"
                         tabIndex={-1}
-                        className="absolute left-0 top-0 origin-top-left border-0 bg-[#0a0a0a]"
+                        className="absolute left-0 top-0 origin-top-left border-0 bg-surface"
                         style={{ width: 1280, height: Math.ceil(size.h / scale), transform: `scale(${scale})` }}
                     />
                 )}
