@@ -1,25 +1,77 @@
 @import "tailwindcss";
 
+/* Farben und Typografie aus dem Code²-CD-Guide (03_Design_System/design-tokens.json) */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --accent: #7c5cff;
+  --background: #050505;
+  --surface: #0a0a0b;
+  --surface-strong: #0e0e10;
+  --foreground: #f2f2f2;
+  --muted: #929297;
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: rgba(255, 255, 255, 0.075);
+  --violet: #7b5cff;
+  --pink: #ff2da1;
+  --orange: #ff7a00;
+  --yellow: #ffc600;
+  --blue: #3a7cff;
+  --accent: var(--violet);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-violet: var(--violet);
+  --color-pink: var(--pink);
+  --color-orange: var(--orange);
+  --color-yellow: var(--yellow);
+  --color-blue: var(--blue);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(123 92 255 / 35%);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 4px;
+}
+
+/* Hero-Typografie laut CD-Guide */
+.brand-hero {
+  font-weight: 420;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useSpring, useScroll } from "framer-motion";
 import LivePreview from "@/components/live-preview";
 import { FEATURED_PROJECTS } from "@/components/projects-data";
+import { Wortmarke, Mastericon } from "@/components/marke";
 
 // --- Scroll-Reveal: Elemente fliegen beim Reinscrollen aus einem Blur ein ---
 function Reveal({
@@ -176,7 +177,7 @@ export default function Sections() {
     const lineProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
     return (
-        <div className="relative bg-[#0a0a0a]">
+        <div className="relative bg-background">
             {/* --- Hintergrund: Raster + Korn (die Cursor-Lampe bleibt dem Hero vorbehalten) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div
@@ -221,7 +222,7 @@ export default function Sections() {
                                 href={p.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group block overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-white/10 transition hover:ring-accent/60"
+                                className="group block overflow-hidden rounded-2xl bg-surface-strong ring-1 ring-white/10 transition hover:ring-accent/60"
                             >
                                 <LivePreview href={p.href!} fallback={p.src} name={p.domain!} />
                                 <div className="p-6">
@@ -262,8 +263,14 @@ export default function Sections() {
                 <div className="space-y-6">
                     {SERVICES.map((s, i) => (
                         <Reveal key={s.nr} delay={i * 0.1}>
-                            <div className="grid gap-6 rounded-2xl bg-neutral-900 p-8 ring-1 ring-white/10 md:grid-cols-[auto_1fr_1fr] md:gap-10 md:p-10">
-                                <p className="text-4xl font-semibold text-white/15 md:text-5xl">{s.nr}</p>
+                            <div className="grid gap-6 rounded-2xl bg-surface-strong p-8 ring-1 ring-white/10 md:grid-cols-[auto_1fr_1fr] md:gap-10 md:p-10">
+                                {/* Nummern in der Markenfolge Violett → Pink → Orange */}
+                                <p
+                                    className="text-4xl font-semibold md:text-5xl"
+                                    style={{ color: ["var(--violet)", "var(--pink)", "var(--orange)"][i], opacity: 0.5 }}
+                                >
+                                    {s.nr}
+                                </p>
                                 <div>
                                     <h3 className="text-2xl font-semibold text-neutral-50">{s.name}</h3>
                                     <p className="mt-0.5 text-sm font-medium text-accent">„{s.product}“</p>
@@ -294,7 +301,7 @@ export default function Sections() {
                     <div className="absolute left-4 top-0 h-full w-px bg-white/10 md:left-1/2" />
                     <motion.div
                         style={{ scaleY: lineProgress }}
-                        className="absolute left-4 top-0 h-full w-px origin-top bg-accent shadow-[0_0_12px_rgba(124,92,255,0.7)] md:left-1/2"
+                        className="absolute left-4 top-0 h-full w-px origin-top bg-gradient-to-b from-violet via-pink to-orange shadow-[0_0_12px_rgba(123,92,255,0.7)] md:left-1/2"
                     />
 
                     <div className="space-y-12 md:space-y-20">
@@ -428,7 +435,10 @@ export default function Sections() {
                 </div>
                 <footer className="relative border-t border-white/10">
                     <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-xs text-neutral-500 md:flex-row md:px-10">
-                        <span className="font-bold tracking-[0.35em] text-neutral-300">STUDIO</span>
+                        <span className="flex items-center gap-3">
+                            <Mastericon className="h-8 w-8" />
+                            <Wortmarke className="h-4 opacity-70" />
+                        </span>
                         <span>© 2026 — Webseiten · Automatisierung · KI für den Mittelstand</span>
                         <span className="flex gap-6">
                             <a href="#" className="hover:text-neutral-300">Impressum</a>

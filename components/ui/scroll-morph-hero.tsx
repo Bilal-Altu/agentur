@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, useScroll } from "framer-motion";
+import { Mastericon } from "@/components/marke";
 
 // --- Types ---
 export type AnimationPhase = "scatter" | "line" | "circle" | "bottom-strip";
@@ -257,7 +258,7 @@ export default function IntroAnimation() {
     return (
         // Hohe Sektion gibt den Scrollweg vor; der Hero bleibt darin stehen (sticky)
         <section ref={sectionRef} className="relative h-[240vh]">
-        <div ref={containerRef} className="sticky top-0 h-svh w-full bg-[#0a0a0a] overflow-hidden">
+        <div ref={containerRef} className="sticky top-0 h-svh w-full bg-background overflow-hidden">
             {/* --- Hintergrund-Ebenen (rein dekorativ) --- */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
                 {/* Akzent-Glow: wandert beim Morph mit den Karten nach unten */}
@@ -316,11 +317,19 @@ export default function IntroAnimation() {
                 {/* Intro Text (Fades out) */}
                 {/* Textbreite bleibt innerhalb des Kartenkreises (Radius ≈ min(38vmin, 350px)) */}
                 <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2 max-w-[min(46vmin,540px)]">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, scale: 1 } : { opacity: 0 }}
+                        transition={{ duration: 1 }}
+                        className="mb-5"
+                    >
+                        <Mastericon className="h-12 w-12 md:h-16 md:w-16" />
+                    </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 1 }}
-                        className="text-lg font-medium tracking-tight text-neutral-100 sm:text-2xl md:text-3xl lg:text-4xl"
+                        className="brand-hero text-xl text-foreground sm:text-3xl md:text-4xl lg:text-5xl"
                     >
                         Wir bauen digitale Auftritte, die arbeiten.
                     </motion.h1>

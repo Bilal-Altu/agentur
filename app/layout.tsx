@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "STUDIO — Webseiten, Automatisierung & KI für den Mittelstand",
+  title: "Code² — Webseiten, Automatisierung & KI für den Mittelstand",
   description:
     "Wir entwickeln Webseiten, Automatisierungen und KI-Agenten für kleine und mittelständische Unternehmen.",
 };

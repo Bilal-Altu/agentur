@@ -64,7 +64,7 @@ export default function ReferenzenGrid() {
                 );
 
                 const cardClass =
-                    "group block overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-white/10 transition hover:ring-accent/60";
+                    "group block overflow-hidden rounded-2xl bg-surface-strong ring-1 ring-white/10 transition hover:ring-accent/60";
 
                 return (
                     <Card key={p.name + i} delay={(i % 2) * 0.15}>
